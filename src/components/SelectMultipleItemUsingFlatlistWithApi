@@ -1,0 +1,69 @@
+import React, { useState, useEffect } from 'react';
+import { FlatList, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+
+interface Item {
+  id: string;
+  name: string;
+  selected: boolean;
+}
+
+const App: React.FC = () => {
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    // Simulating API call
+    const fetchData = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('https://example.com/api/items');
+        const data = await response.json();
+
+        // Add 'selected' property to each item
+        const itemsWithSelection = data.map((item: Item) => ({
+          ...item,
+          selected: false,
+        }));
+
+        setItems(itemsWithSelection);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSelectItem = (itemId: string) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId ? { ...item, selected: !item.selected } : item
+      )
+    );
+  };
+
+  const renderItem = ({ item }: { item: Item }) => (
+    <TouchableOpacity onPress={() => handleSelectItem(item.id)}>
+      <View style={[styles.item, { backgroundColor: item.selected ? 'lightblue' : 'white' }]}>
+        <Text>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <FlatList
+      data={items}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  item: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+});
+
+export default App;
